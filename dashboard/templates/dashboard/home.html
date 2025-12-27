@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FRAUD_OS // INFERENCE_TERMINAL</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syncopate:wght@700&display=swap');
+
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --deep-dark: #020205;
+            --panel-bg: rgba(6, 6, 10, 0.98);
+        }
+
+        body {
+            background-color: var(--deep-dark);
+            /* Neural Network SVG Background Pattern */
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300f2ff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            color: #e0e0e0;
+            font-family: 'Space Mono', monospace;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .terminal-header {
+            font-family: 'Syncopate', sans-serif;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--neon-blue);
+            display: inline-block;
+            padding-bottom: 5px;
+            text-shadow: 0 0 8px var(--neon-blue);
+            margin-bottom: 2.5rem;
+            letter-spacing: 4px;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            position: relative;
+            padding: 1.5rem;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Scan Button Styling */
+        .scan-trigger {
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 1.2rem;
+            width: 100%;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            letter-spacing: 2px;
+        }
+
+        .scan-trigger:hover {
+            background: rgba(0, 242, 255, 0.05);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3), inset 0 0 10px rgba(0, 242, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* DATA STREAM SCROLL BOX */
+        #data-preview {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            margin-top: 15px;
+            color: var(--neon-blue);
+            font-size: 0.7rem;
+            white-space: nowrap;
+            overflow-x: auto;
+            scrollbar-width: none;
+            /* Hides scrollbar in Firefox */
+        }
+
+        #data-preview::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hides scrollbar in Chrome/Safari */
+
+        /* ELITE TABLE STYLING */
+        .data-table {
+            width: 100%;
+            background: transparent !important;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .data-table th {
+            color: var(--neon-purple);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 10px 15px;
+            border: none !important;
+        }
+
+        .data-table td {
+            background: rgba(255, 255, 255, 0.02);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 15px;
+            border: none !important;
+            font-size: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .risk-high {
+            color: #ff0055 !important;
+            font-weight: bold;
+        }
+
+        .risk-low {
+            color: var(--neon-blue) !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container py-4">
+        <div class="text-center">
+            <h1 class="terminal-header">FRAUD_OS.v2</h1>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-lg-4">
+                <div class="panel h-100">
+                    <label class="small text-secondary mb-3 opacity-50">#_KERNEL_INPUT</label>
+                    <button class="scan-trigger" onclick="runKernel(this)">EXECUTE_INFERENCE</button>
+
+                    <div id="output-log" class="mt-4" style="display:none;">
+                        <div
+                            class="d-flex justify-content-between align-items-center mb-2 border-bottom border-secondary border-opacity-10 pb-2">
+                            <span class="small text-secondary">_VERDICT:</span>
+                            <span id="verdict-label" class="fw-bold"></span>
+                        </div>
+                        <div class="small text-secondary opacity-50 mb-1">_STREAM_BUFFER:</div>
+                        <div id="data-preview"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="panel h-100">
+                    <div id="gauge-container" style="height: 350px;"></div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="panel">
+                    <label class="small text-secondary mb-3 opacity-50">#_LATENT_FEED_LOG</label>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>SEQ_ID</th>
+                                    <th>TIMESTAMP</th>
+                                    <th>PROBABILITY</th>
+                                    <th>INFERENCE</th>
+                                    <th>ACCURACY</th>
+                                </tr>
+                            </thead>
+                            <tbody id="log-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let seq = 1024;
+
+        function runKernel(btn) {
+            btn.innerText = ">> CALCULATING...";
+            btn.style.opacity = "0.7";
+
+            fetch('/dashboard/test-predict/')
+                .then(res => res.json())
+                .then(data => {
+                    setTimeout(() => {
+                        btn.innerText = "EXECUTE_INFERENCE";
+                        btn.style.opacity = "1";
+                        render(data);
+                    }, 300);
+                });
+        }
+
+        function render(data) {
+            const prob = data.prediction.probability;
+            const isFraud = data.prediction.is_fraud;
+            const actual = data.actual_class;
+
+            document.getElementById('output-log').style.display = 'block';
+            const label = document.getElementById('verdict-label');
+            label.innerText = isFraud ? "(!) THREAT_DETECTED" : "(*) SYSTEM_SECURE";
+            label.className = isFraud ? "risk-high" : "risk-low";
+
+            document.getElementById('data-preview').innerText = `DATA_PACKET::[${data.features_preview.join('|')}]`;
+
+            const trace = [{
+                type: "indicator", mode: "gauge+number", value: prob,
+                number: { font: { size: 50, color: 'white' }, suffix: "%" },
+                gauge: {
+                    axis: { range: [0, 100], tickcolor: "#222" },
+                    bar: { color: isFraud ? "#ff0055" : "#00f2ff" },
+                    bgcolor: "transparent",
+                    steps: [{ range: [0, 100], color: "rgba(255,255,255,0.01)" }]
+                }
+            }];
+
+            Plotly.newPlot('gauge-container', trace, {
+                paper_bgcolor: "transparent", font: { color: "#e0e0e0", family: 'Space Mono' },
+                margin: { t: 0, b: 0, l: 60, r: 60 }
+            });
+
+            const tbody = document.getElementById('log-body');
+            const row = tbody.insertRow(0);
+            row.style.animation = "fadeIn 0.5s ease-out";
+            row.innerHTML = `
+            <td class="opacity-30">#${seq++}</td>
+            <td>${new Date().toLocaleTimeString()}</td>
+            <td class="${prob > 50 ? 'risk-high' : 'risk-low'}">${prob}%</td>
+            <td>${isFraud ? 'THREAT' : 'SECURE'}</td>
+            <td>${isFraud === actual ? '<span style="color:var(--neon-blue); opacity:0.8">✓ VALID</span>' : '<span style="color:#ff0055">! FAIL</span>'}</td>
+        `;
+        }
+    </script>
+
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</body>
+
+</html>

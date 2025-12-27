@@ -1,0 +1,12 @@
+# Environments
+venv/
+.env
+
+# Large Data Files (CRITICAL: Do not upload to GitHub!)
+data/creditcard.csv
+
+# Python & Django junk
+__pycache__/
+*.pyc
+db.sqlite3
+dashboard/ml_assets/fraud_model.pkl
