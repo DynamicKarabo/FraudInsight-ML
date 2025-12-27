@@ -1,12 +1,29 @@
-# Environments
+# --- Machine Learning Data ---
+# CRITICAL: Do not upload the raw dataset to GitHub
+data/creditcard.csv
+# Only upload the .pkl if it is small, otherwise ignore it
+dashboard/ml_assets/*.pkl
+
+# --- Environments & Secrets ---
 venv/
 .env
+.venv
+env/
+bin/
+lib/
 
-# Large Data Files (CRITICAL: Do not upload to GitHub!)
-data/creditcard.csv
-
-# Python & Django junk
-__pycache__/
-*.pyc
+# --- Django Specifics ---
 db.sqlite3
-dashboard/ml_assets/fraud_model.pkl
+*.log
+local_settings.py
+staticfiles/
+
+# --- Python Junk ---
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# --- OS Specifics ---
+.DS_Store
+Thumbs.db
