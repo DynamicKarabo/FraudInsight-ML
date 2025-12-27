@@ -3,214 +3,294 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>FraudInsight Pro | Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FRAUDINSIGHT | TERMINAL</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         :root {
-            --bg: #000;
-            --card: #0a0a0a;
-            --border: #262626;
-            --text: #fff;
-            --muted: #888;
+            --bg: #050505;
+            --card: #0c0c0c;
+            --border: #1f1f1f;
+            --text: #ffffff;
+            --muted: #666666;
             --danger: #ff3333;
             --success: #00ff88;
+            --accent: #ffffff;
         }
 
         body {
-            background: var(--bg);
+            background-color: var(--bg);
             color: var(--text);
-            font-family: -apple-system, sans-serif;
-            margin: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            letter-spacing: -0.02em;
+            overflow-x: hidden;
         }
 
+        /* Top Navigation */
         .v-nav {
             border-bottom: 1px solid var(--border);
-            padding: 16px 32px;
+            padding: 20px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
+        .v-logo {
+            font-weight: 800;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+
+        /* Dashboard Grid */
         .v-card {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 24px;
+            border-radius: 12px;
+            padding: 30px;
             height: 100%;
+            transition: border 0.3s ease;
+        }
+
+        .v-card:hover {
+            border-color: #333;
         }
 
         .v-label {
             color: var(--muted);
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 12px;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
 
         .v-stat {
-            font-size: 1.75rem;
-            font-weight: 700;
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
         }
 
-        .btn-vercel {
-            background: #fff;
+        /* Inference Button */
+        .btn-main {
+            background: var(--accent);
             color: #000;
-            font-weight: 600;
+            font-weight: 700;
             border: none;
-            padding: 14px;
-            border-radius: 6px;
+            padding: 18px;
+            border-radius: 8px;
             width: 100%;
-            margin-top: 20px;
-            transition: all 0.2s;
+            margin-top: 25px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .btn-vercel:disabled {
-            background: #333;
-            color: #666;
+        .btn-main:hover {
+            transform: scale(1.02);
+            opacity: 0.9;
+        }
+
+        .btn-main:active {
+            transform: scale(0.98);
+        }
+
+        .btn-main:disabled {
+            background: #222;
+            color: #555;
             cursor: not-allowed;
         }
 
-        .table {
-            color: var(--text);
-            width: 100%;
-            border-collapse: collapse;
+        /* Activity Feed */
+        .feed-container {
+            max-height: 500px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            /* Firefox */
         }
 
-        .table thead th {
-            background: #0f0f0f;
+        .feed-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .feed-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            padding: 16px 0;
             border-bottom: 1px solid var(--border);
-            color: var(--muted);
-            font-size: 0.7rem;
-            padding: 16px;
-            text-align: left;
+            animation: slideIn 0.4s ease-out forwards;
         }
 
-        .table td {
-            border-bottom: 1px solid var(--border);
-            padding: 16px;
-            font-size: 0.85rem;
-        }
-
-        @keyframes fadeIn {
+        @keyframes slideIn {
             from {
                 opacity: 0;
+                transform: translateX(10px);
             }
 
             to {
                 opacity: 1;
+                transform: translateX(0);
             }
         }
 
-        .new-row {
-            animation: fadeIn 0.5s ease-in;
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .badge-clear {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--success);
+        }
+
+        .badge-fraud {
+            background: rgba(255, 51, 51, 0.1);
+            color: var(--danger);
         }
     </style>
 </head>
 
 <body>
+
     <nav class="v-nav">
-        <div style="font-weight:700; letter-spacing:1px;">FRAUDINSIGHT // TERMINAL</div>
-        <div id="status-light" style="font-size:0.75rem; color:var(--success); font-weight:700;">● SYSTEM ACTIVE</div>
+        <div class="v-logo">FRAUDINSIGHT // V2.0.4</div>
+        <div style="font-size: 0.7rem; color: var(--muted);">NODE: <span style="color:var(--success)">G-2910</span> |
+            ENGINE: <span style="color:var(--text)">RF_PRO_PROD</span></div>
     </nav>
 
-    <div class="container-fluid p-4">
-        <div class="row g-3 mb-4">
+    <div class="container-fluid p-5">
+        <div class="row g-4 mb-5">
             <div class="col-md-3">
                 <div class="v-card">
-                    <div class="v-label">Total Scans</div>
+                    <div class="v-label">Real-time Scans</div>
                     <div class="v-stat" id="total-scans">0</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="v-card">
-                    <div class="v-label">Threats</div>
+                    <div class="v-label">Blocked Threats</div>
                     <div class="v-stat text-danger" id="total-fraud">0</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="v-card">
-                    <div class="v-label">Inference Latency</div>
-                    <div class="v-stat text-success" id="latency">0ms</div>
+                    <div class="v-label">Latency (ms)</div>
+                    <div class="v-stat" id="latency-val" style="color: var(--success);">0</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="v-card">
-                    <div class="v-label">Security Protocol</div>
-                    <div class="v-stat" style="font-size:1rem;">AES_ENCRYPTED_V2</div>
+                    <div class="v-label">System Health</div>
+                    <div class="v-stat">99.9%</div>
                 </div>
             </div>
         </div>
 
-        <div class="row g-3">
+        <div class="row g-4">
             <div class="col-lg-4">
                 <div class="v-card">
-                    <div class="v-label">Risk Assessment</div>
-                    <div id="gauge-chart" style="height: 250px;"></div>
-                    <button onclick="runInference()" id="scan-btn" class="btn-vercel">Run Inference</button>
+                    <div class="v-label">Risk Distribution</div>
+                    <div id="gauge-container"></div>
+                    <button onclick="runInference()" id="main-btn" class="btn-main">Trigger Inference</button>
                 </div>
             </div>
+
             <div class="col-lg-8">
-                <div class="v-card" style="padding:0; overflow:hidden;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>TIMESTAMP</th>
-                                <th>AMOUNT</th>
-                                <th>PROBABILITY</th>
-                                <th>STATUS</th>
-                                <th>ACTIONS</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-body"></tbody>
-                    </table>
+                <div class="v-card">
+                    <div class="v-label" style="margin-bottom: 20px;">Live Transaction Feed</div>
+                    <div
+                        style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; border-bottom: 1px solid #222; padding-bottom: 10px; color: var(--muted); font-size: 0.65rem; font-weight: 800; text-transform: uppercase;">
+                        <div>Timestamp</div>
+                        <div>Transaction ID</div>
+                        <div>Amount</div>
+                        <div>Security Status</div>
+                    </div>
+                    <div id="feed" class="feed-container">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let scans = 0, frauds = 0;
+        let scansCount = 0;
+        let fraudCount = 0;
+
         const initGauge = () => {
-            const data = [{ type: "indicator", mode: "gauge+number", value: 0, number: { suffix: "%", font: { color: 'white' } }, gauge: { axis: { range: [0, 100], tickcolor: "#444" }, bar: { color: "#fff" }, bgcolor: "#111", borderwidth: 0 } }];
-            Plotly.newPlot('gauge-chart', data, { paper_bgcolor: "rgba(0,0,0,0)", margin: { t: 0, b: 0, l: 30, r: 30 }, height: 250 });
+            const setup = [{
+                type: "indicator",
+                mode: "gauge+number",
+                value: 0,
+                number: { suffix: "%", font: { color: 'white', size: 30 } },
+                gauge: {
+                    axis: { range: [0, 100], tickcolor: "#222" },
+                    bar: { color: "#ffffff" },
+                    bgcolor: "#000",
+                    borderwidth: 1,
+                    bordercolor: "#222"
+                }
+            }];
+            const layout = { paper_bgcolor: "rgba(0,0,0,0)", margin: { t: 0, b: 0, l: 30, r: 30 }, height: 250 };
+            Plotly.newPlot('gauge-container', setup, layout);
         };
         initGauge();
 
         async function runInference() {
-            const btn = document.getElementById('scan-btn'), start = performance.now();
-            btn.disabled = true; btn.innerText = "Analyzing Signal...";
+            const btn = document.getElementById('main-btn');
+            const startTime = performance.now();
+
+            btn.disabled = true;
+            btn.innerText = "Analyzing Packet...";
 
             try {
                 const response = await fetch('/dashboard/predict/');
                 const data = await response.json();
-                if (data.error) throw new Error(data.error);
 
-                scans++; if (data.prediction === "Fraud") frauds++;
-                document.getElementById('total-scans').innerText = scans;
-                document.getElementById('total-fraud').innerText = frauds;
+                // Update Stats
+                scansCount++;
+                if (data.prediction === "Fraud") fraudCount++;
+                document.getElementById('total-scans').innerText = scansCount;
+                document.getElementById('total-fraud').innerText = fraudCount;
 
-                Plotly.restyle('gauge-chart', { 'value': [data.probability * 100], 'gauge.bar.color': [data.prediction === "Fraud" ? "#ff3333" : "#fff"] });
+                // Update Gauge
+                Plotly.restyle('gauge-container', {
+                    'value': [data.probability * 100],
+                    'gauge.bar.color': [data.prediction === "Fraud" ? "#ff3333" : "#ffffff"]
+                });
 
-                const tbody = document.getElementById('history-body');
-                const row = tbody.insertRow(0);
-                row.className = "new-row";
-                const color = data.prediction === "Fraud" ? "var(--danger)" : "var(--success)";
+                // Update Feed
+                const feed = document.getElementById('feed');
+                const item = document.createElement('div');
+                item.className = 'feed-item';
 
-                row.innerHTML = `
-                    <td>${new Date().toLocaleTimeString()}</td>
-                    <td>$${data.amount.toFixed(2)}</td>
-                    <td>${(data.probability * 100).toFixed(1)}%</td>
-                    <td style="color:${color}; font-weight:700;">${data.prediction.toUpperCase()}</td>
-                    <td><button style="background:transparent; border:1px solid var(--border); color:var(--muted); font-size:0.6rem; padding:2px 8px;" onclick="this.closest('tr').remove()">DISMISS</button></td>
-                `;
+                const isFraud = data.prediction === "Fraud";
+                const badgeClass = isFraud ? 'badge-fraud' : 'badge-clear';
 
-                document.getElementById('latency').innerText = Math.round(performance.now() - start) + "ms";
+                item.innerHTML = `
+                <div style="font-size: 0.8rem;">${new Date().toLocaleTimeString()}</div>
+                <div style="color: var(--muted); font-family: monospace;">#${Math.random().toString(16).slice(2, 8).toUpperCase()}</div>
+                <div style="font-weight: 700;">$${data.amount.toFixed(2)}</div>
+                <div><span class="badge-status ${badgeClass}">${data.prediction}</span></div>
+            `;
+
+                feed.prepend(item);
+
+                // Update Latency
+                document.getElementById('latency-val').innerText = Math.round(performance.now() - startTime);
+
             } catch (e) {
-                console.error(e);
-                alert("Server error: Check terminal logs.");
+                console.error("Critical Failure:", e);
             } finally {
-                btn.disabled = false; btn.innerText = "Run Inference";
+                btn.disabled = false;
+                btn.innerText = "Trigger Inference";
             }
         }
     </script>
