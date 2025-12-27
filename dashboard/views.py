@@ -1,29 +1,47 @@
+import os
+import joblib
+import pandas as pd
 from django.shortcuts import render
 from django.http import JsonResponse
-from .services import FraudModelService
-import random
+from django.conf import settings
 
-def home(request):
-    return render(request, 'dashboard/home.html')
+def dashboard_view(request):
+    """Renders the main dashboard page"""
+    return render(request, 'dashboard/dashboard.html')
 
 def predict_fraud(request):
-    """API that returns a prediction. Includes logic to force fraud 20% of the time for demos."""
-    df = FraudModelService.get_data()
-    
-    # 20% chance to force-fetch a fraudulent transaction for the demo
-    if random.random() < 0.20:
-        fraud_rows = df[df['Class'] == 1]
-        row = fraud_rows.sample(n=1).iloc[0]
-        features = row.drop('Class').values.tolist()
-        actual_class = 1
-    else:
-        features, actual_class = FraudModelService.get_random_transaction()
-    
-    result = FraudModelService.predict(features)
-    
-    return JsonResponse({
-        'status': 'success',
-        'prediction': result,
-        'actual_class': actual_class,
-        'features_preview': features[:3]
-    })
+    """Handles AI inference and keeps the 'Time' feature"""
+    try:
+        # 1. Setup absolute paths
+        model_path = os.path.join(settings.BASE_DIR, 'dashboard', 'ml_assets', 'fraud_model.pkl')
+        csv_path = os.path.join(settings.BASE_DIR, 'data', 'creditcard.csv')
+
+        # 2. Verify files exist
+        if not os.path.exists(model_path) or not os.path.exists(csv_path):
+            return JsonResponse({'error': 'Required ML files not found'}, status=500)
+
+        # 3. Load model and data
+        model = joblib.load(model_path)
+        df = pd.read_csv(csv_path)
+        
+        # 4. Sample a transaction
+        sample = df.sample(1)
+        
+        # 5. FIX: Only drop 'Class'. We MUST keep 'Time' for this specific model
+        features = sample.drop(['Class'], axis=1)
+
+        # 6. Run Model
+        prediction = model.predict(features)[0]
+        probability = model.predict_proba(features)[0][1]
+        amount = sample['Amount'].values[0]
+
+        return JsonResponse({
+            'prediction': 'Fraud' if int(prediction) == 1 else 'Clear',
+            'probability': float(probability),
+            'amount': float(amount)
+        })
+        
+    except Exception as e:
+        # Prints specific errors to your terminal for debugging
+        print(f"--- SERVER ERROR: {str(e)} ---")
+        return JsonResponse({'error': str(e)}, status=500)

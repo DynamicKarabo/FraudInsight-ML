@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FraudInsight Pro | Terminal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        :root {
+            --bg: #000;
+            --card: #0a0a0a;
+            --border: #262626;
+            --text: #fff;
+            --muted: #888;
+            --danger: #ff3333;
+            --success: #00ff88;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, sans-serif;
+            margin: 0;
+        }
+
+        .v-nav {
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .v-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            height: 100%;
+        }
+
+        .v-label {
+            color: var(--muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .v-stat {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .btn-vercel {
+            background: #fff;
+            color: #000;
+            font-weight: 600;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+
+        .btn-vercel:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .table {
+            color: var(--text);
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table thead th {
+            background: #0f0f0f;
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.7rem;
+            padding: 16px;
+            text-align: left;
+        }
+
+        .table td {
+            border-bottom: 1px solid var(--border);
+            padding: 16px;
+            font-size: 0.85rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .new-row {
+            animation: fadeIn 0.5s ease-in;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="v-nav">
+        <div style="font-weight:700; letter-spacing:1px;">FRAUDINSIGHT // TERMINAL</div>
+        <div id="status-light" style="font-size:0.75rem; color:var(--success); font-weight:700;">● SYSTEM ACTIVE</div>
+    </nav>
+
+    <div class="container-fluid p-4">
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="v-card">
+                    <div class="v-label">Total Scans</div>
+                    <div class="v-stat" id="total-scans">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="v-card">
+                    <div class="v-label">Threats</div>
+                    <div class="v-stat text-danger" id="total-fraud">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="v-card">
+                    <div class="v-label">Inference Latency</div>
+                    <div class="v-stat text-success" id="latency">0ms</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="v-card">
+                    <div class="v-label">Security Protocol</div>
+                    <div class="v-stat" style="font-size:1rem;">AES_ENCRYPTED_V2</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-lg-4">
+                <div class="v-card">
+                    <div class="v-label">Risk Assessment</div>
+                    <div id="gauge-chart" style="height: 250px;"></div>
+                    <button onclick="runInference()" id="scan-btn" class="btn-vercel">Run Inference</button>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="v-card" style="padding:0; overflow:hidden;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>TIMESTAMP</th>
+                                <th>AMOUNT</th>
+                                <th>PROBABILITY</th>
+                                <th>STATUS</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scans = 0, frauds = 0;
+        const initGauge = () => {
+            const data = [{ type: "indicator", mode: "gauge+number", value: 0, number: { suffix: "%", font: { color: 'white' } }, gauge: { axis: { range: [0, 100], tickcolor: "#444" }, bar: { color: "#fff" }, bgcolor: "#111", borderwidth: 0 } }];
+            Plotly.newPlot('gauge-chart', data, { paper_bgcolor: "rgba(0,0,0,0)", margin: { t: 0, b: 0, l: 30, r: 30 }, height: 250 });
+        };
+        initGauge();
+
+        async function runInference() {
+            const btn = document.getElementById('scan-btn'), start = performance.now();
+            btn.disabled = true; btn.innerText = "Analyzing Signal...";
+
+            try {
+                const response = await fetch('/dashboard/predict/');
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                scans++; if (data.prediction === "Fraud") frauds++;
+                document.getElementById('total-scans').innerText = scans;
+                document.getElementById('total-fraud').innerText = frauds;
+
+                Plotly.restyle('gauge-chart', { 'value': [data.probability * 100], 'gauge.bar.color': [data.prediction === "Fraud" ? "#ff3333" : "#fff"] });
+
+                const tbody = document.getElementById('history-body');
+                const row = tbody.insertRow(0);
+                row.className = "new-row";
+                const color = data.prediction === "Fraud" ? "var(--danger)" : "var(--success)";
+
+                row.innerHTML = `
+                    <td>${new Date().toLocaleTimeString()}</td>
+                    <td>$${data.amount.toFixed(2)}</td>
+                    <td>${(data.probability * 100).toFixed(1)}%</td>
+                    <td style="color:${color}; font-weight:700;">${data.prediction.toUpperCase()}</td>
+                    <td><button style="background:transparent; border:1px solid var(--border); color:var(--muted); font-size:0.6rem; padding:2px 8px;" onclick="this.closest('tr').remove()">DISMISS</button></td>
+                `;
+
+                document.getElementById('latency').innerText = Math.round(performance.now() - start) + "ms";
+            } catch (e) {
+                console.error(e);
+                alert("Server error: Check terminal logs.");
+            } finally {
+                btn.disabled = false; btn.innerText = "Run Inference";
+            }
+        }
+    </script>
+</body>
+
+</html>

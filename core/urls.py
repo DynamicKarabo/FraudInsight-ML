@@ -1,7 +1,8 @@
 from django.contrib import admin
-from django.urls import path, include # Make sure 'include' is imported
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('dashboard/', include('dashboard.urls')), # This connects the two files
+    # This connects the project to your dashboard app
+    path('dashboard/', include('dashboard.urls')), 
 ]
