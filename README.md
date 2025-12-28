@@ -39,7 +39,7 @@ Inference Speed: Local execution allows the Random Forest model to perform class
 Model Weights: The pre-trained fraud_model.pkl is located in dashboard/ml_assets/. If the file is missing, run the training script in the /scripts directory.
 
 🧠 Technical Challenges & Problem Solving
-During the development of FRAUD_OS.v2, I encountered several architectural and deployment hurdles that required strategic problem-solving.
+During the development of FRAUD_OS.v2, I encountered several architectural and deployment hurdles that required strategic problem-solving. 
 
 1. The "250MB Serverless Wall" (Deployment Tradeoffs)
 The Challenge: Initial deployment attempts to Vercel failed due to the 250MB unzipped limit for serverless functions. The combination of heavy ML libraries (scikit-learn, pandas, numpy) and the serialized model weights exceeded this constraint.
